@@ -7,6 +7,7 @@ const errHandler = require("./utils/errorHandler");
 app.use(express.json());
 
 // app.use("/api/students", studenRoute);
+
 app.use("/api/user/auth", authRoute);
 
 app.use((req, res) => {
