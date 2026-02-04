@@ -8,19 +8,21 @@ const validate = require("../middlewares/authMiddleware");
 authRouter.post(
   "/signup",
   validate(authSchema.createAuthSchema),
-  asyncHandler(authController.userSignup)
+  asyncHandler(authController.userSignup),
 );
+authRouter.post("/verify-email", asyncHandler(authController.verifyEmail));
+
 authRouter.post(
   "/login",
   validate(authSchema.authLoginSchema),
-  asyncHandler(authController.userLogin)
+  asyncHandler(authController.userLogin),
 );
 
 authRouter.put(
   "/forgotPassword",
   validate(authSchema.authResetPasswordSchema),
-  asyncHandler(authController.forgotPassword)
+  asyncHandler(authController.forgotPassword),
 );
 
-authRouter.post('/resetPassword',asyncHandler(authController.resetPassword))
+authRouter.post("/resetPassword", asyncHandler(authController.resetPassword));
 module.exports = authRouter;

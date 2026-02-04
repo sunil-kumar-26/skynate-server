@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Welcome to Skynate</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f8fafc 0%,
+          #e8f1ff 35%,
+          #e9e4ff 65%,
+          #f3e8ff 100%
+        );
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .box {
+        max-width: 600px;
+        margin: auto;
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        background: linear-gradient(
+          135deg,
+          #f8fafc 0%,
+          #e8f1ff 35%,
+          #e9e4ff 65%,
+          #f3e8ff 100%
+        );
+      }
+      .header {
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 30px;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #777;
+        padding: 15px;
+      }
+      .img {
+        width: 50%;
+        height: 50%;
+      }
+      a {
+        text-decoration: none;
+      }
+      button {
+        background-color: white;
+        color: #333;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="content">
+        <div class="header">
+          <h1>Verify mail to Continue Skynate</h1>
+        </div>
+        <p>please click on the verify now button to verify your mail</p>
+        <a href="<%= verify %>">
+          <button>Verify Now</button>
+        </a>
+        <img src="https://i.imgur.com/hSIbJrT.png" alt="skynate" class="img" />
+        <p>Hi <strong><%= email %></strong>,</p>
+
+        <p>Your account has been successfully created on <b>Skynate</b>.</p>
+
+        <p>Now please verify your mail to authenticate as skynate user</p>
+      </div>
+
+      <div class="footer">© <%= new Date().getFullYear() %> Skynate</div>
+    </div>
+  </body>
+</html>

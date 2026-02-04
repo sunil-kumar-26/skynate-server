@@ -8,7 +8,7 @@ const signJwt = (payload) => {
 };
 
 const varifyJwt = (token) => {
-  return jwt.varifyJwt(token, cess.env.JWT_SECRET);
+  return jwt.varifyJwt(token, process.env.JWT_SECRET);
 };
 
 module.exports = { signJwt, varifyJwt };

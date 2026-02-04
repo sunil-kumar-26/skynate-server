@@ -2,34 +2,73 @@ const { bcryptPassword, comparePassword } = require("../utils/bcrypt");
 const authService = require("../services/authService");
 const { signJwt } = require("../utils/jwt");
 const createResetToken = require("../utils/token");
-const { sendResetMail,sendSignUpMail } = require("../utils/mailer");
+const {
+  sendResetMail,
+  sendSignUpMail,
+  verifyMail,
+} = require("../utils/mailer");
 const crypto = require("crypto");
+const hashToken = require("../utils/hashToken");
 require("dotenv").config();
 
 exports.userSignup = async (req, res) => {
   const { name, email, password } = req.body;
+
   const emailExist = await authService.findUserByEmail(email);
+
   if (emailExist)
     return res
       .status(400)
-      .json({ message: "Email already taken, please choose different" });
+      .json({ message: "Email already taken, please choose new one" });
+
   const hashPassword = await bcryptPassword(password);
+
+  const { resetToken, hashedToken } = createResetToken();
+
+  const expireAt = new Date(Date.now() + 15 * 60 * 1000);
+
   const userData = await authService.createUser({
     name: name,
     email: email,
     password: hashPassword,
+    emailVerifyToken: hashedToken,
+    emailVerifyExpiresAt: expireAt,
   });
-  await sendSignUpMail({to:email})
+
+  const verifyUrl = `${process.env.FRONTEND_URL}/verifyEmail?token=${resetToken}&id=${userData._id}`;
+
+  await sendSignUpMail({ to: email });
+  await verifyMail({ to: email, verifyMail: verifyUrl });
+
   return res
     .status(201)
     .json({ message: "user created successfully", data: userData });
+};
+
+exports.verifyEmail = async (req, res) => {
+  const { token, id } = req.body;
+
+  const hashedToken = hashToken(token);
+
+  const user = await authService.findUserByIdAndHashedToken(id,hashedToken)
+  if (!user)
+    return res.status(400).json({ message: "Invalid or expired token" });
+
+  user.isEmailVerified = true;
+  user.emailVerifyToken = undefined;
+  user.emailVerifyExpiresAt = undefined;
+  await user.save();
+
+  return res.status(200).json({
+    message: "Email verified successfully. Please login.",
+  });
 };
 
 exports.userLogin = async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.findUserByEmail(email);
 
-  if (!user.email) return res.status(401).json({ message: "Email not found " });
+  if (!user) return res.status(401).json({ message: "Email not found" });
   const varified = await comparePassword(password, user.password);
   if (!varified) return res.status(401).json({ message: "invalid password" });
   const token = signJwt({ id: user.id, email: user.email });
