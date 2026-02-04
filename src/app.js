@@ -7,7 +7,29 @@ const errHandler = require("./utils/errorHandler");
 const chatRoute = require("./routes/chatRoute");
 const cors = require("cors");
 
-app.use(cors({ origin: "http://localhost:5174", credentials: true }));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://skynateai.netlify.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(
+          new Error("CORS not allowed for this origin: " + origin),
+        );
+      }
+    },
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
