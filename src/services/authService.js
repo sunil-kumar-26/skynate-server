@@ -11,6 +11,15 @@ const findUserByEmail = async (email) => {
   return emailAvailable;
 };
 
+const findUserByIdAndHashedToken = async (id, hashedToken) => {
+  const emailAvailable = await authModel.findOne({
+    _id: id,
+    emailVerifyToken: hashedToken,
+    emailVerifyExpiresAt: { $gt: Date.now() },
+  });
+  return emailAvailable;
+};
+
 const setResetToken = async (userId, hashedToken, expireAt) => {
   const reset = await authModel.findByIdAndUpdate(userId, {
     resetPasswordToken: hashedToken,
@@ -49,4 +58,5 @@ module.exports = {
   findUserByResetToken,
   clearResetToken,
   updateUserPassword,
+  findUserByIdAndHashedToken,
 };

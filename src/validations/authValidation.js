@@ -4,6 +4,7 @@ const createAuthSchema = joi.object({
   name: joi.string().min(3).required(),
   email: joi.string().email().required(),
   password: joi.string().min(8).required(),
+  terms: joi.boolean(),
 });
 
 const authLoginSchema = joi.object({

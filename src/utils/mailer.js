@@ -1,4 +1,6 @@
 const nodemailer = require("nodemailer");
+const path = require("path");
+const ejs = require("ejs");
 require("dotenv").config();
 
 const transport = nodemailer.createTransport({
@@ -22,15 +24,30 @@ const sendResetMail = async ({ to, resetUrl }) => {
   return info;
 };
 const sendSignUpMail = async ({ to }) => {
+  const html = await ejs.renderFile(
+    path.join(__dirname, "../views/mail/signupMail.ejs"),
+    { email: to },
+  );
   const info = await transport.sendMail({
     from: process.env.EMAIL_FROM,
     to,
-    subject: "SignUp Mail",
-    text: `Account is successfully created, If you didn't request this, ignore this email.`,
-    html: `<p>Hii,user you have successfully created account on devbros using your ${to} </p>
-           <p>If you are not signup, ignore this email.</p></div>`,
+    subject: "Skynate Signup",
+    html,
+  });
+  return info;
+};
+const verifyMail = async ({ to, verifyMail }) => {
+  const html = await ejs.renderFile(
+    path.join(__dirname, "../views/mail/verifyMail.ejs"),
+    { email: to, verify: verifyMail },
+  );
+  const info = await transport.sendMail({
+    from: process.env.EMAIL_FROM,
+    to,
+    subject: "Skynate Verify",
+    html,
   });
   return info;
 };
 
-module.exports = { sendResetMail, sendSignUpMail };
+module.exports = { sendResetMail, sendSignUpMail, verifyMail };

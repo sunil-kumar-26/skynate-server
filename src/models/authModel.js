@@ -1,3 +1,4 @@
+const { required } = require("joi");
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
@@ -11,13 +12,15 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     password: { type: String, required: true },
-    isEmailVerified: { type: Boolean },
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerifyToken: { type: String },
+    emailVerifyExpiresAt: { type: Date },
     resetPasswordToken: { type: String },
     resetPasswordExpiresAt: { type: Date },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const users = mongoose.model("authenicate-user-collection", userSchema);
