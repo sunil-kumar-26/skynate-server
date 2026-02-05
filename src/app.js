@@ -11,6 +11,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "https://skynateai.netlify.app",
+  "https://skynate.enginex.site",
+  "https://enginex.site",
 ];
 
 app.use(
