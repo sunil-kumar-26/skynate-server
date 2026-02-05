@@ -1,53 +1,57 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const path = require("path");
 const ejs = require("ejs");
 require("dotenv").config();
 
-const transport = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendResetMail = async ({ to, resetUrl }) => {
-  const info = await transport.sendMail({
+  return await resend.emails.send({
     from: process.env.EMAIL_FROM,
     to,
-    subject: "Password reset for your account",
-    text: `You requested a password reset. Click the link to reset your password:\n\n${resetUrl}\n\nIf you didn't request this, ignore this email.`,
-    html: `<p>You requested a password reset. Click the link to reset your password:</p>
-           <p><a href="${resetUrl}">${resetUrl}</a></p>
-           <p>If you didn't request this, ignore this email.</p>`,
+    subject: "Reset your Skynate password",
+    html: `
+      <p>You requested a password reset.</p>
+      <p><a href="${resetUrl}">Reset Password</a></p>
+      <p>If you didn't request this, ignore this email.</p>
+    `,
   });
-  return info;
 };
+
 const sendSignUpMail = async ({ to }) => {
-  const html = await ejs.renderFile(
-    path.join(__dirname, "../views/mail/signupMail.ejs"),
-    { email: to },
-  );
-  const info = await transport.sendMail({
-    from: process.env.EMAIL_FROM,
-    to,
-    subject: "Skynate Signup",
-    html,
-  });
-  return info;
+  try {
+    const html = await ejs.renderFile(
+      path.join(__dirname, "../views/mail/signupMail.ejs"),
+      { email: to }
+    );
+
+    const response = await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to,
+      subject: "Welcome to Skynate ",
+      html,
+    });
+
+    console.log("RESEND RESPONSE:", response);
+    return response;
+  } catch (error) {
+    console.error("RESEND ERROR:", error);
+    throw error;
+  }
 };
+
 const verifyMail = async ({ to, verifyMail }) => {
   const html = await ejs.renderFile(
     path.join(__dirname, "../views/mail/verifyMail.ejs"),
     { email: to, verify: verifyMail },
   );
-  const info = await transport.sendMail({
+
+  return await resend.emails.send({
     from: process.env.EMAIL_FROM,
     to,
-    subject: "Skynate Verify",
+    subject: "Verify your Skynate account",
     html,
   });
-  return info;
 };
 
 module.exports = { sendResetMail, sendSignUpMail, verifyMail };
