@@ -12,6 +12,17 @@ authRouter.post(
 );
 authRouter.post("/verify-email", asyncHandler(authController.verifyEmail));
 
+authRouter.get(
+  "/google",
+  asyncHandler(authController.googleLogin),
+);
+
+authRouter.get(
+  "/google/callback",
+  asyncHandler(authController.googleCallback),
+);
+
+
 authRouter.post(
   "/login",
   validate(authSchema.authLoginSchema),

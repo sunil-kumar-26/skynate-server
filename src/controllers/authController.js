@@ -40,9 +40,12 @@ exports.userSignup = async (req, res) => {
   await sendSignUpMail({ to: email });
   await verifyMail({ to: email, verifyMail: verifyUrl });
 
-  return res
-    .status(201)
-    .json({ message: "user created successfully", data: userData });
+  const token = signJwt({ id: userData.id, email: userData.email });
+  return res.status(201).json({
+    message: "user created successfully",
+    data: userData,
+    url: `${process.env.FRONTEND_URL_LINK}/chat?token=${token}`,
+  });
 };
 
 exports.verifyEmail = async (req, res) => {
@@ -50,7 +53,7 @@ exports.verifyEmail = async (req, res) => {
 
   const hashedToken = hashToken(token);
 
-  const user = await authService.findUserByIdAndHashedToken(id,hashedToken)
+  const user = await authService.findUserByIdAndHashedToken(id, hashedToken);
   if (!user)
     return res.status(400).json({ message: "Invalid or expired token" });
 
@@ -111,4 +114,38 @@ exports.resetPassword = async (req, res) => {
   await authService.updateUserPassword(user.id, newHashedPassword);
   await authService.clearResetToken(user.id);
   return res.status(200).json({ message: "Password reset successful" });
+};
+
+exports.googleLogin = async (req, res) => {
+  const url = await authService.googleLogin();
+  res.redirect(url);
+};
+
+exports.googleCallback = async (req, res) => {
+  const googleInfo = await authService.googleLoginCallback(req, res);
+  const emailExist = await authService.findUserByEmail(googleInfo?.data?.email);
+
+  if (emailExist) {
+    const token = signJwt({ id: emailExist.id, email: emailExist.email });
+    return res.redirect(`${process.env.FRONTEND_URL_LINK}/chat?token=${token}`);
+  }
+
+  const userData = await authService.createUser({
+    name: googleInfo?.data?.name,
+    email: googleInfo?.data?.email,
+    isEmailVerified: googleInfo?.data?.email_verified,
+    picture: googleInfo.data.picture,
+    emailVerifyToken: undefined,
+    emailVerifyExpiresAt: undefined,
+  });
+
+  const token = signJwt({ id: userData.id, email: userData.email });
+
+  res.data = {
+    message: "User logged in succussfully",
+    token: token,
+    userInfo: userData,
+  };
+  await sendSignUpMail({ to: userData.email });
+  return res.redirect(`${process.env.FRONTEND_URL_LINK}/chat?token=${token}`);
 };

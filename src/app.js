@@ -6,6 +6,7 @@ const authRoute = require("./routes/authRoute");
 const errHandler = require("./utils/errorHandler");
 const chatRoute = require("./routes/chatRoute");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -32,6 +33,7 @@ app.use(
   }),
 );
 
+app.use(cookieParser());
 app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
