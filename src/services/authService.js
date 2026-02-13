@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const authModel = require("../models/authModel");
+const axios = require("axios");
+const googleService = require("./googleService");
 
 const createUser = async (data) => {
   const userCreated = await authModel.create(data);
@@ -51,7 +53,34 @@ const updateUserPassword = async (userId, newHashedPassword) => {
   return newPassword;
 };
 
+const googleLogin = async () => {
+  const url =
+    "https://accounts.google.com/o/oauth2/v2/auth?" +
+    new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      response_type: "code",
+      scope: "openid email profile",
+    });
+
+  return url;
+};
+
+const googleLoginCallback = async (req, res) => {
+  try {
+    const tokenRes = await googleService.handleCallBack(req, res);
+    const idToken = tokenRes.data.id_token;
+    const userInfo = await googleService.handleGoogleToken(idToken);
+    return userInfo;
+  } catch (err) {
+    console.error(err);
+    res.send("Login failed");
+  }
+};
+
 module.exports = {
+  googleLoginCallback,
+  googleLogin,
   findUserByEmail,
   createUser,
   setResetToken,

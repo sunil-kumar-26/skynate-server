@@ -31,8 +31,6 @@ const sendSignUpMail = async ({ to }) => {
       subject: "Welcome to Skynate ",
       html,
     });
-
-    console.log("RESEND RESPONSE:", response);
     return response;
   } catch (error) {
     console.error("RESEND ERROR:", error);
